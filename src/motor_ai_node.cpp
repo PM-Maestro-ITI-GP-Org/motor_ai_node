@@ -42,6 +42,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "inference.hpp"
+
 namespace {
 
 const char *kConfigEnv     = "MOTOR_AI_NODE_CONFIG";
@@ -56,6 +58,13 @@ const char *kStageName[kStageCount] = { "anomaly", "fault_class", "rul" };
 struct NodeConfig {
     std::string dataDir{"/motor_data"};
     std::string pidFile{"/motor_data/ai.pid"};
+    // Where model/ and config/ live. Defaults to the directory the binary was
+    // installed into, so a checkout runs without a config file at all.
+    std::string modelRoot{"."};
+    // How many past windows to pool into one verdict. window_rows = 26000 is
+    // 1.3 s at 20 kHz -- one speed -- and the models were fitted on features
+    // pooled across a full speed sweep. 1 disables pooling entirely.
+    int poolWindows{20};
     int         sig[kStageCount];
 
     NodeConfig()
@@ -220,6 +229,13 @@ void loadConfig(NodeConfig &_cfg)
 
         if      (key == "data_dir")    _cfg.dataDir = val;
         else if (key == "ai_pid_file") _cfg.pidFile = val;
+        else if (key == "model_root")  _cfg.modelRoot = val;
+        else if (key == "pool_windows") {
+            const int n = std::atoi(val.c_str());
+            if (n < 1) std::cerr << "[AI-node] config: pool_windows must be >= 1 -- "
+                                    "keeping the default" << std::endl;
+            else _cfg.poolWindows = n;
+        }
         else if (key == "sig_anomaly" || key == "sig_fault_class" || key == "sig_rul") {
             const int sig = parseSignal(val);
             if (sig < 0) {
@@ -257,31 +273,35 @@ long countWindowRows(const std::string &_csvPath)
 }
 
 // ---------------------------------------------------------------------------
-// The models -- placeholders
+// The models
 // ---------------------------------------------------------------------------
-// MOTOR_AI_FAKE_ANOMALY=1 makes this report an anomaly on every window, which
-// is how the other two stages get exercised at all: the server only runs them
-// when this one answers something other than "normal", so without a way to
-// force it the fault-classification and RUL paths never execute on a healthy
-// rig.
+// The work is in inference.hpp. These three stay as thin as they were, because
+// which model runs is decided by which signal arrived and nowhere else.
+//
+// MOTOR_AI_FAKE_ANOMALY=1 still forces an anomaly on every window, which is how
+// the other two stages are reachable on a healthy rig at all -- the server only
+// asks for them when this one answers something other than "normal".
+inference::Engine g_engine;
+
 std::string runAnomaly(long _rows)
 {
     std::cout << "[AI-node] anomaly detection over " << _rows << " rows" << std::endl;
 
     const char *fake = std::getenv("MOTOR_AI_FAKE_ANOMALY");
-    return (fake && fake[0] == '1') ? "anomaly" : "normal";
+    if (fake && fake[0] == '1') return "anomaly";
+    return g_engine.runAnomaly();
 }
 
 std::string runFaultClass(long _rows)
 {
     std::cout << "[AI-node] fault classification over " << _rows << " rows" << std::endl;
-    return "unclassified";
+    return g_engine.runFaultClass();
 }
 
 std::string runRul(long _rows)
 {
     std::cout << "[AI-node] remaining useful life over " << _rows << " rows" << std::endl;
-    return "unknown";
+    return g_engine.runRul();
 }
 
 // ---------------------------------------------------------------------------
@@ -369,6 +389,13 @@ int main()
         }
     }
 
+    // Models before the pidfile, for the same reason the handlers come before
+    // it: once the pid is published the server may signal at any moment, and a
+    // node that answers "unknown" to everything is indistinguishable from a
+    // broken server. Failing here is loud and immediate instead.
+    if (!g_engine.load(cfg.modelRoot, cfg.poolWindows, /*windowsPerRead=*/20))
+        return 1;
+
     // Shutdown. SIGTERM is deliberately absent: by default it is the RUL
     // request, so it cannot also mean "stop". That has a consequence outside
     // this file -- `systemctl stop` sends SIGTERM, so the unit has to set
@@ -429,6 +456,12 @@ int main()
 
             const long rows = countWindowRows(csvPath);
             if (rows < 0) continue;   // no window: let the server time out
+
+            // Features come from the window once, here, and all three stages
+            // read the same vector. A window that cannot be turned into
+            // features is also a timeout: answering "unknown" would look to the
+            // server like a verdict, and it has no way to tell the difference.
+            if (!g_engine.refresh(csvPath)) continue;
 
             std::string value;
             switch (s) {

@@ -1,0 +1,56 @@
+{
+  "task": "anomaly",
+  "data_status": "provisional",
+  "data_note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
+  "measurable": true,
+  "normal_source": "features_anomaly.csv",
+  "n_development": 1800,
+  "n_validation_normal": 600,
+  "n_test_normal": 600,
+  "n_validation_fault": 300,
+  "n_test_fault": 300,
+  "n_features_candidate": 284,
+  "n_features_selected": 40,
+  "primary_model": "isolation_forest",
+  "isolation_forest": {
+    "threshold": 0.44972948413709907,
+    "percentile": 15.0,
+    "fallback": "",
+    "validation": {
+      "false_alarm_rate": 0.15,
+      "detection_rate": 0.9433333333333334,
+      "precision": 0.7587131367292225,
+      "f1": 0.8410104011887073,
+      "roc_auc": 0.9350499999999999
+    },
+    "test": {
+      "false_alarm_rate": 0.16666666666666666,
+      "detection_rate": 0.9666666666666667,
+      "precision": 0.7435897435897436,
+      "f1": 0.8405797101449275,
+      "roc_auc": 0.9119111111111112
+    }
+  },
+  "mahalanobis": {
+    "threshold": 4.535390106910751,
+    "percentile": 15.0,
+    "fallback": "",
+    "validation": {
+      "false_alarm_rate": 0.15,
+      "detection_rate": 0.7466666666666667,
+      "precision": 0.7133757961783439,
+      "f1": 0.7296416938110749,
+      "roc_auc": 0.8765555555555555
+    },
+    "test": {
+      "false_alarm_rate": 0.18666666666666668,
+      "detection_rate": 0.7333333333333333,
+      "precision": 0.6626506024096386,
+      "f1": 0.6962025316455697,
+      "roc_auc": 0.8441777777777779
+    }
+  },
+  "test_roc_auc": 0.9119111111111112,
+  "test_detection_rate": 0.9666666666666667,
+  "test_false_alarm_rate": 0.16666666666666666
+}

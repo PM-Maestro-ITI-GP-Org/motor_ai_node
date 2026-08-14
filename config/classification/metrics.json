@@ -1,0 +1,57 @@
+{
+  "task": "classification",
+  "data_status": "provisional",
+  "data_note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
+  "split_mode": "stratified group split by session (with ungrouped classes \u2014 see notes)",
+  "split_ratios": {
+    "development": 0.6,
+    "validation": 0.2,
+    "test": 0.2
+  },
+  "n_development": 2700,
+  "n_validation": 900,
+  "n_test": 900,
+  "n_features_candidate": 284,
+  "n_features_selected": 60,
+  "classes": [
+    "electrical",
+    "normal"
+  ],
+  "n_classes": 2,
+  "validation": {
+    "accuracy": 0.9744444444444444,
+    "f1_macro": 0.9713213381712988,
+    "confusion_matrix": [
+      [
+        290,
+        10
+      ],
+      [
+        13,
+        587
+      ]
+    ],
+    "n_rows": 900
+  },
+  "test": {
+    "accuracy": 0.9744444444444444,
+    "f1_macro": 0.971225981687492,
+    "confusion_matrix": [
+      [
+        288,
+        12
+      ],
+      [
+        11,
+        589
+      ]
+    ],
+    "n_rows": 900
+  },
+  "forest_baseline_validation": {
+    "accuracy": 0.9777777777777777,
+    "f1_macro": 0.9746979212936672
+  },
+  "test_accuracy": 0.9744444444444444,
+  "test_f1_macro": 0.971225981687492
+}

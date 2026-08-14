@@ -4,6 +4,15 @@ The inference half of the QNX motor demo's AI pipeline. It runs on the Linux
 guest (guest-2), beside [motor_ai_server][server], and sleeps until that
 service asks it for a verdict.
 
+Three real models, no ML runtime: anomaly detection by Mahalanobis distance,
+fault classification by a small 1-D CNN, and remaining useful life by a ridge
+fit onto four health bands. They are JSON, evaluated by plain arithmetic in
+`include/models.hpp` — no TensorFlow, no scikit-learn, nothing to install.
+Trained by [the AI repository][ai]; `model/` and `config/` here are the pinned
+copies that ship.
+
+[ai]: https://github.com/PM-Maestro-ITI-GP-Org/AI
+
 [server]: https://github.com/PM-Maestro-ITI-GP-Org/motor_ai_server
 [client]: https://github.com/PM-Maestro-ITI-GP-Org/motor_ai_client
 
@@ -72,12 +81,35 @@ stage name and a genuinely new file, and was computed from a window that is
 already gone. If `request.ini` is absent the node echoes `id = 0`, which the
 server rejects.
 
+## Why the window is pooled
+
+`window_rows = 26000` is **1.3 seconds** at 20 kHz, and at 1.3 seconds the motor
+is at one speed. The models were fitted on features pooled across a full speed
+sweep, and current imbalance moves about ten times more with speed than it does
+with the fault — so a window from one speed reads as a different motor.
+
+Measured on real recordings, one 26 000-row window at a time:
+
+| | failed motor | healthy motor |
+|---|---|---|
+| `pool_windows = 1` | anomaly detected **3 of 6**; one window reported `early, 3.88 months` for a dead motor | 1 false alarm in 6 |
+| `pool_windows = 20` | anomaly detected **19 of 20**; RUL `failed` from the second window on | 1 false alarm in 20 |
+
+So the node keeps a ring of the last `pool_windows` feature vectors and scores
+the median of the ring. Nothing about the protocol changes — the server, the
+client and `window_rows` are untouched — and the ring holds features, not
+samples, so it costs about 50 kB. Peak RSS is ~11 MB either way, dominated by
+parsing the CSV.
+
+The cost is that a verdict describes the motor over the last ~26 s rather than
+strictly the window just received. For RUL that is the intended reading; the
+server's own `rul_interval_ms` documentation makes the same argument. Set
+`pool_windows = 1` for strict per-window scoring.
+
 ### Four things a replacement must keep
 
-The models here are placeholders. Swapping them for real inference is meant to
-be a change to `runAnomaly()` and its two siblings and nothing else — but the
-mechanics around them are load-bearing, and a rewrite that drops any of these
-breaks in a way that looks like the *server's* fault:
+The mechanics around the models are load-bearing, and a rewrite that drops any
+of these breaks in a way that looks like the *server's* fault:
 
 1. **Echo `id=` back from `request.ini`.** It is what proves the result
    answers the request in flight rather than an earlier one.
@@ -130,7 +162,9 @@ two places rather than three.
 
 ## Building
 
-No dependencies. Any C++14 compiler:
+No dependencies outside this tree — `include/` carries the feature code, the
+models and the JSON parser, `kissfft/` the FFT. C++17, because `include/` uses
+structured bindings; the node's own source is still plain C++:
 
 ```sh
 make
@@ -151,7 +185,7 @@ The handshake is drivable from a shell, because the server's half of it is just
 ```sh
 make
 mkdir -p /tmp/md/input_data /tmp/md/results
-printf 'data_dir = /tmp/md\nai_pid_file = /tmp/md/ai.pid\n' > /tmp/node.conf
+printf 'data_dir = /tmp/md\nai_pid_file = /tmp/md/ai.pid\nmodel_root = .\n' > /tmp/node.conf
 
 MOTOR_AI_NODE_CONFIG=/tmp/node.conf MOTOR_AI_FAKE_ANOMALY=1 ./motor_ai_node &
 
@@ -166,5 +200,16 @@ kill -INT $(cat /tmp/md/ai.pid)     # SIGINT, not SIGTERM -- see above
 ```
 
 `MOTOR_AI_FAKE_ANOMALY=1` makes the anomaly stage report an anomaly on every
-window. Without it the other two stages are unreachable, because the server
-only asks for them when the first answers something other than `normal`.
+window. Without it the other two stages are unreachable on a healthy rig,
+because the server only asks for them when the first answers something other
+than `normal`.
+
+`some-window.csv` must be a real recording in the logger's format —
+`timestamp, Current_0..2, Speed_volt_cmd, Volt_0..2, DC_bus_volt, vib_x/y/z` —
+with at least `window_rows` rows. Columns the node does not know about are
+ignored; the ones it needs are listed in `config/feature_extraction.json`.
+
+Feeding the same file repeatedly does not fill the ring: the window is cached
+on its identity, so the second and third stages of one request reuse the
+features rather than recomputing them. Write a *different* window each time to
+see the ring behave as it does in service.

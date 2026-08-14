@@ -1,0 +1,50 @@
+{
+  "task": "rul",
+  "data_status": "provisional",
+  "data_note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
+  "split_strategy": "interleaved",
+  "n_development": 450,
+  "n_validation": 125,
+  "n_test": 150,
+  "n_units": 1,
+  "n_time_indices": 6,
+  "life_index": 5,
+  "n_features_candidate": 265,
+  "n_features_selected": 8,
+  "windows_pooled": 20,
+  "n_windows": 14498,
+  "bands": [
+    "healthy",
+    "early",
+    "mid",
+    "failed"
+  ],
+  "validation": {
+    "spearman": 0.7358671488995095,
+    "exact_band": 0.4,
+    "within_one_band": 0.952,
+    "health_mae": 0.14600000000000002,
+    "rul_mae_months": 0.73,
+    "n_rows": 125
+  },
+  "test": {
+    "spearman": 0.5236298404850163,
+    "exact_band": 0.7,
+    "within_one_band": 1.0,
+    "health_mae": 0.05750000000000002,
+    "rul_mae_months": 0.2875000000000002,
+    "n_rows": 150
+  },
+  "leave_one_recording_out": {
+    "n_recordings": 10,
+    "exact_band": 0.6,
+    "within_one_band": 1.0,
+    "spearman": 0.8199778267512093,
+    "rul_mae_months": 0.4166666666666668
+  },
+  "test_spearman": 0.5236298404850163,
+  "test_health_mae": 0.05750000000000002,
+  "loro_within_one_band": 1.0,
+  "loro_exact_band": 0.6,
+  "loro_spearman": 0.8199778267512093
+}

@@ -1,0 +1,26 @@
+{
+  "primary_model": "isolation_forest",
+  "threshold": 0.44972948413709907,
+  "percentile": 15.0,
+  "strategy": "max_false_alarm",
+  "calibrated_on": "validation normals",
+  "direction": "higher_is_anomalous",
+  "development_score_summary": {
+    "min": 0.379150750393527,
+    "p50": 0.40606878437253713,
+    "p95": 0.5128974330740298,
+    "max": 0.723711490928273
+  },
+  "operating_point_validation": {
+    "false_alarm_rate": 0.15,
+    "detection_rate": 0.9433333333333334,
+    "precision": 0.7587131367292225,
+    "f1": 0.8410104011887073,
+    "roc_auc": 0.9350499999999999
+  },
+  "alternative_model": {
+    "kind": "mahalanobis",
+    "threshold": 4.535390106910751,
+    "runs_without_sklearn": true
+  }
+}
