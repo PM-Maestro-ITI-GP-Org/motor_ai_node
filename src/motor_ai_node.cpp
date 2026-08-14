@@ -128,6 +128,50 @@ int parseSignal(const std::string &_s)
     return -1;
 }
 
+// Pull one key out of an already-read .ini body. Same syntax as node.conf and
+// as the result this writes: the three files the two programs exchange are
+// deliberately one format, so there is one parser to get right.
+bool iniFind(const std::string &_doc, const std::string &_key, std::string &_out)
+{
+    std::istringstream in(_doc);
+    std::string line;
+    while (std::getline(in, line)) {
+        const size_t hash = line.find('#');
+        if (hash != std::string::npos) line = line.substr(0, hash);
+
+        const size_t eq = line.find('=');
+        if (eq == std::string::npos) continue;
+
+        if (trim(line.substr(0, eq)) == _key) {
+            _out = trim(line.substr(eq + 1));
+            return true;
+        }
+    }
+    return false;
+}
+
+// The id of the request being answered, or 0 if there is none to read.
+//
+// The server writes results/request.ini before it signals, and checks that
+// what comes back carries the same id. That is what tells its answer from a
+// late one to a request that already timed out -- the stage name alone cannot,
+// because the stage after a timeout is very often the same stage again.
+//
+// Echoed rather than interpreted: this does not decide anything from the id,
+// and the stage it runs comes from which signal arrived, not from this file.
+unsigned long long readRequestId(const std::string &_requestPath)
+{
+    std::ifstream f(_requestPath.c_str());
+    if (!f.is_open()) return 0;
+
+    std::stringstream ss;
+    ss << f.rdbuf();
+
+    std::string id;
+    if (!iniFind(ss.str(), "id", id)) return 0;
+    return std::strtoull(id.c_str(), NULL, 10);
+}
+
 bool mkdirp(const std::string &_path)
 {
     if (_path.empty()) return false;
@@ -243,10 +287,13 @@ std::string runRul(long _rows)
 // ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
-// stage= is what lets the server tell this answer from a late one to the
-// previous request; see readResult() on that side. It is not decoration.
+// stage= and id= are what let the server tell this answer from a late one to
+// an earlier request; see readResult() on that side. Neither is decoration:
+// stage= catches a different stage's answer, id= catches the same stage's
+// answer to a request that has already timed out.
 bool writeResult(const std::string &_resultPath,
                  const char *_stage,
+                 unsigned long long _id,
                  const std::string &_value,
                  long _rows)
 {
@@ -261,6 +308,7 @@ bool writeResult(const std::string &_resultPath,
 
         f << "# written by motor_ai_node\n"
           << "stage = " << _stage << "\n"
+          << "id = "    << _id    << "\n"
           << "value = " << _value << "\n"
           << "rows = "  << _rows  << "\n";
 
@@ -286,8 +334,9 @@ int main()
     NodeConfig cfg;
     loadConfig(cfg);
 
-    const std::string csvPath    = cfg.dataDir + "/input_data/data.csv";
-    const std::string resultPath = cfg.dataDir + "/results/result.ini";
+    const std::string csvPath     = cfg.dataDir + "/input_data/data.csv";
+    const std::string resultPath  = cfg.dataDir + "/results/result.ini";
+    const std::string requestPath = cfg.dataDir + "/results/request.ini";
 
     if (!mkdirp(cfg.dataDir + "/input_data") || !mkdirp(cfg.dataDir + "/results")) {
         std::cerr << "[AI-node] ERROR: could not create " << cfg.dataDir
@@ -374,6 +423,10 @@ int main()
             if (!g_pending[s]) continue;
             g_pending[s] = 0;
 
+            // Read before the window, because it identifies the request that
+            // the window belongs to.
+            const unsigned long long id = readRequestId(requestPath);
+
             const long rows = countWindowRows(csvPath);
             if (rows < 0) continue;   // no window: let the server time out
 
@@ -384,7 +437,7 @@ int main()
                 default:          value = runRul(rows);        break;
             }
 
-            writeResult(resultPath, kStageName[s], value, rows);
+            writeResult(resultPath, kStageName[s], id, value, rows);
         }
     }
 
