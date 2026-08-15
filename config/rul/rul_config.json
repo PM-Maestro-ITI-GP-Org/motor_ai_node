@@ -2,7 +2,7 @@
   "status": "provisional",
   "note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
   "time_unit": "month",
-  "life_index": 5,
+  "life_index": 4,
   "life_index_source": "declared: 0.1 ohm (1 parallel resistor) is a failed motor \u2014 declared, not run to failure",
   "bands": {
     "names": [
@@ -16,13 +16,12 @@
       "1": 1,
       "2": 1,
       "3": 2,
-      "4": 2,
-      "5": 3
+      "4": 3
     },
     "resistance_ohm": {
       "0": 0.0,
-      "1": 0.0225,
-      "2": 0.04166666666666667,
+      "1": 0.018750000000000003,
+      "2": 0.05,
       "3": 0.1
     },
     "rationale": "levels 0.005-0.008 ohm apart do not separate (AUC 0.497 for month_1 vs month_2); bands merge only what the data cannot tell apart"
@@ -33,10 +32,9 @@
     1,
     2,
     3,
-    4,
-    5
+    4
   ],
   "n_units": 1,
-  "n_features": 8,
+  "n_features": 9,
   "split_strategy": "interleaved"
 }

@@ -4,53 +4,85 @@
   "data_note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
   "measurable": true,
   "normal_source": "features_anomaly.csv",
-  "n_development": 1800,
-  "n_validation_normal": 600,
-  "n_test_normal": 600,
-  "n_validation_fault": 300,
-  "n_test_fault": 300,
-  "n_features_candidate": 284,
+  "n_development": 75,
+  "n_validation_normal": 75,
+  "n_test_normal": 75,
+  "n_validation_fault": 75,
+  "n_test_fault": 75,
+  "n_features_candidate": 265,
   "n_features_selected": 40,
   "primary_model": "isolation_forest",
   "isolation_forest": {
-    "threshold": 0.44972948413709907,
-    "percentile": 15.0,
+    "threshold": 0.5973836269720114,
+    "percentile": 14.5,
     "fallback": "",
     "validation": {
-      "false_alarm_rate": 0.15,
-      "detection_rate": 0.9433333333333334,
-      "precision": 0.7587131367292225,
-      "f1": 0.8410104011887073,
-      "roc_auc": 0.9350499999999999
+      "false_alarm_rate": 0.14666666666666667,
+      "detection_rate": 0.4666666666666667,
+      "precision": 0.7608695652173914,
+      "f1": 0.578512396694215,
+      "roc_auc": 0.8535111111111111
     },
     "test": {
-      "false_alarm_rate": 0.16666666666666666,
-      "detection_rate": 0.9666666666666667,
-      "precision": 0.7435897435897436,
-      "f1": 0.8405797101449275,
-      "roc_auc": 0.9119111111111112
+      "false_alarm_rate": 0.21333333333333335,
+      "detection_rate": 0.37333333333333335,
+      "precision": 0.6363636363636364,
+      "f1": 0.47058823529411764,
+      "roc_auc": 0.5709333333333333
+    },
+    "by_condition": {
+      "electrical": {
+        "n_blocks": 225,
+        "n_sessions": 3,
+        "median_score": 0.5335716026251912,
+        "detection_rate": 0.4088888888888889,
+        "roc_auc": 0.7776
+      },
+      "mechanical": {
+        "n_blocks": 150,
+        "n_sessions": 2,
+        "median_score": 0.49572100291140786,
+        "detection_rate": 0.4066666666666667,
+        "roc_auc": 0.6444666666666666
+      }
     }
   },
   "mahalanobis": {
-    "threshold": 4.535390106910751,
-    "percentile": 15.0,
+    "threshold": 8.176344311527137,
+    "percentile": 6.0,
     "fallback": "",
     "validation": {
-      "false_alarm_rate": 0.15,
-      "detection_rate": 0.7466666666666667,
-      "precision": 0.7133757961783439,
-      "f1": 0.7296416938110749,
-      "roc_auc": 0.8765555555555555
+      "false_alarm_rate": 0.06666666666666667,
+      "detection_rate": 1.0,
+      "precision": 0.9375,
+      "f1": 0.967741935483871,
+      "roc_auc": 0.9907555555555556
     },
     "test": {
-      "false_alarm_rate": 0.18666666666666668,
-      "detection_rate": 0.7333333333333333,
-      "precision": 0.6626506024096386,
-      "f1": 0.6962025316455697,
-      "roc_auc": 0.8441777777777779
+      "false_alarm_rate": 0.21333333333333335,
+      "detection_rate": 0.4,
+      "precision": 0.6521739130434783,
+      "f1": 0.4958677685950412,
+      "roc_auc": 0.5822222222222221
+    },
+    "by_condition": {
+      "electrical": {
+        "n_blocks": 225,
+        "n_sessions": 3,
+        "median_score": 17.38575679713957,
+        "detection_rate": 0.9822222222222222,
+        "roc_auc": 0.9239703703703704
+      },
+      "mechanical": {
+        "n_blocks": 150,
+        "n_sessions": 2,
+        "median_score": 5.039338972833968,
+        "detection_rate": 0.36666666666666664,
+        "roc_auc": 0.6484444444444444
+      }
     }
   },
-  "test_roc_auc": 0.9119111111111112,
-  "test_detection_rate": 0.9666666666666667,
-  "test_false_alarm_rate": 0.16666666666666666
+  "test_roc_auc": 0.5709333333333333,
+  "test_detection_rate": 0.37333333333333335,
+  "test_false_alarm_rate": 0.21333333333333335
 }

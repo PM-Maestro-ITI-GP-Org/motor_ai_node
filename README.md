@@ -106,6 +106,46 @@ strictly the window just received. For RUL that is the intended reading; the
 server's own `rul_interval_ms` documentation makes the same argument. Set
 `pool_windows = 1` for strict per-window scoring.
 
+## The anomaly stage is not trustworthy on one window yet
+
+Measured on the current models, same healthy recording, same threshold (8.18):
+
+| what the node is given | anomaly score | verdict |
+|---|---|---|
+| the whole 288 s recording | 5.06 | normal — correct |
+| one 26 000-row window (1.3 s) | 108–127 | **anomaly — wrong** |
+
+Raising `pool_windows` does not fix it: the score stays at 110–127 with a full
+ring of 20, because every entry in the ring is itself a narrow capture.
+
+The reason is the model, not the pooling. The anomaly detector is a Mahalanobis
+distance fitted on **one** healthy recording — three healthy recordings split
+60/20/20 by session leaves exactly one in development — and that distance grows
+very fast off-distribution. A vector pooled across a whole speed sweep averages
+the session-to-session difference away and lands near the fitted cloud; any
+short capture at one speed does not, and the distance explodes.
+
+So on the device today: **the fault classifier and the RUL band are reliable on
+a 1.3 s window, and the anomaly stage is not.** RUL is unaffected because a
+ridge fit is linear and degrades gracefully; it reads the correct band on every
+recording tested.
+
+What fixes it, in order of effect:
+
+1. **More healthy recordings, from more sessions.** With four or more the split
+   can fit on two sessions, so the model learns what day-to-day variation looks
+   like instead of treating it as a fault.
+2. **Fit the anomaly model on blocks that match what the device sees** — short,
+   single-speed captures rather than sweep-pooled ones. Training and inference
+   currently use different representations, and Mahalanobis is the least
+   forgiving model in the set about that.
+
+Until one of those lands, treat `anomalyResult` as advisory and read
+`faultClassResult` and `predMaintResult` on their own. Note that
+`motor_ai_server` only asks for those two when the anomaly stage says something
+other than `normal`, so a false alarm costs two extra model runs rather than a
+wrong answer — the failure direction is the safe one.
+
 ### Four things a replacement must keep
 
 The mechanics around the models are load-bearing, and a rewrite that drops any

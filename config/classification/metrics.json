@@ -8,50 +8,65 @@
     "validation": 0.2,
     "test": 0.2
   },
-  "n_development": 2700,
-  "n_validation": 900,
-  "n_test": 900,
-  "n_features_candidate": 284,
+  "n_development": 240,
+  "n_validation": 180,
+  "n_test": 180,
+  "n_features_candidate": 265,
   "n_features_selected": 60,
   "classes": [
     "electrical",
+    "mechanical",
     "normal"
   ],
-  "n_classes": 2,
+  "n_classes": 3,
   "validation": {
-    "accuracy": 0.9744444444444444,
-    "f1_macro": 0.9713213381712988,
+    "accuracy": 0.7166666666666667,
+    "f1_macro": 0.6768508872419806,
     "confusion_matrix": [
       [
-        290,
-        10
+        73,
+        2,
+        0
       ],
       [
-        13,
-        587
+        0,
+        24,
+        6
+      ],
+      [
+        6,
+        37,
+        32
       ]
     ],
-    "n_rows": 900
+    "n_rows": 180
   },
   "test": {
-    "accuracy": 0.9744444444444444,
-    "f1_macro": 0.971225981687492,
+    "accuracy": 0.7888888888888889,
+    "f1_macro": 0.7565477768188873,
     "confusion_matrix": [
       [
-        288,
-        12
+        73,
+        2,
+        0
       ],
       [
-        11,
-        589
+        1,
+        26,
+        3
+      ],
+      [
+        4,
+        28,
+        43
       ]
     ],
-    "n_rows": 900
+    "n_rows": 180
   },
   "forest_baseline_validation": {
-    "accuracy": 0.9777777777777777,
-    "f1_macro": 0.9746979212936672
+    "accuracy": 0.75,
+    "f1_macro": 0.7203847986294843
   },
-  "test_accuracy": 0.9744444444444444,
-  "test_f1_macro": 0.971225981687492
+  "test_accuracy": 0.7888888888888889,
+  "test_f1_macro": 0.7565477768188873
 }
