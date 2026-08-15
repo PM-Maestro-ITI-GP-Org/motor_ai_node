@@ -35,6 +35,6 @@
     4
   ],
   "n_units": 1,
-  "n_features": 9,
+  "n_features": 10,
   "split_strategy": "interleaved"
 }

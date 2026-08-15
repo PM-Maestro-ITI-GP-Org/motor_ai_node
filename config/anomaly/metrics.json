@@ -4,85 +4,85 @@
   "data_note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
   "measurable": true,
   "normal_source": "features_anomaly.csv",
-  "n_development": 75,
-  "n_validation_normal": 75,
-  "n_test_normal": 75,
-  "n_validation_fault": 75,
-  "n_test_fault": 75,
+  "n_development": 199,
+  "n_validation_normal": 201,
+  "n_test_normal": 288,
+  "n_validation_fault": 311,
+  "n_test_fault": 312,
   "n_features_candidate": 265,
   "n_features_selected": 40,
   "primary_model": "isolation_forest",
   "isolation_forest": {
-    "threshold": 0.5973836269720114,
-    "percentile": 14.5,
+    "threshold": 0.5022753115760432,
+    "percentile": 15.0,
     "fallback": "",
     "validation": {
-      "false_alarm_rate": 0.14666666666666667,
-      "detection_rate": 0.4666666666666667,
-      "precision": 0.7608695652173914,
-      "f1": 0.578512396694215,
-      "roc_auc": 0.8535111111111111
+      "false_alarm_rate": 0.14925373134328357,
+      "detection_rate": 0.5916398713826366,
+      "precision": 0.8598130841121495,
+      "f1": 0.700952380952381,
+      "roc_auc": 0.8724384508326535
     },
     "test": {
-      "false_alarm_rate": 0.21333333333333335,
-      "detection_rate": 0.37333333333333335,
-      "precision": 0.6363636363636364,
-      "f1": 0.47058823529411764,
-      "roc_auc": 0.5709333333333333
+      "false_alarm_rate": 0.2604166666666667,
+      "detection_rate": 0.44551282051282054,
+      "precision": 0.6495327102803738,
+      "f1": 0.5285171102661598,
+      "roc_auc": 0.563991274928775
     },
     "by_condition": {
       "electrical": {
-        "n_blocks": 225,
+        "n_blocks": 752,
         "n_sessions": 3,
-        "median_score": 0.5335716026251912,
-        "detection_rate": 0.4088888888888889,
-        "roc_auc": 0.7776
+        "median_score": 0.5160527428909845,
+        "detection_rate": 0.5651595744680851,
+        "roc_auc": 0.8110750337205761
       },
       "mechanical": {
-        "n_blocks": 150,
+        "n_blocks": 459,
         "n_sessions": 2,
-        "median_score": 0.49572100291140786,
-        "detection_rate": 0.4066666666666667,
-        "roc_auc": 0.6444666666666666
+        "median_score": 0.489785002263578,
+        "detection_rate": 0.46187363834422657,
+        "roc_auc": 0.5993914039144401
       }
     }
   },
   "mahalanobis": {
-    "threshold": 8.176344311527137,
+    "threshold": 7.428187011163492,
     "percentile": 6.0,
     "fallback": "",
     "validation": {
-      "false_alarm_rate": 0.06666666666666667,
+      "false_alarm_rate": 0.05970149253731343,
       "detection_rate": 1.0,
-      "precision": 0.9375,
-      "f1": 0.967741935483871,
-      "roc_auc": 0.9907555555555556
+      "precision": 0.9628482972136223,
+      "f1": 0.9810725552050473,
+      "roc_auc": 0.9978883716465903
     },
     "test": {
-      "false_alarm_rate": 0.21333333333333335,
-      "detection_rate": 0.4,
-      "precision": 0.6521739130434783,
-      "f1": 0.4958677685950412,
-      "roc_auc": 0.5822222222222221
+      "false_alarm_rate": 0.22916666666666666,
+      "detection_rate": 0.38461538461538464,
+      "precision": 0.6451612903225806,
+      "f1": 0.4819277108433735,
+      "roc_auc": 0.5845241274928775
     },
     "by_condition": {
       "electrical": {
-        "n_blocks": 225,
+        "n_blocks": 752,
         "n_sessions": 3,
-        "median_score": 17.38575679713957,
-        "detection_rate": 0.9822222222222222,
-        "roc_auc": 0.9239703703703704
+        "median_score": 19.287920886752175,
+        "detection_rate": 0.9920212765957447,
+        "roc_auc": 0.9408339859896445
       },
       "mechanical": {
-        "n_blocks": 150,
+        "n_blocks": 459,
         "n_sessions": 2,
-        "median_score": 5.039338972833968,
-        "detection_rate": 0.36666666666666664,
-        "roc_auc": 0.6484444444444444
+        "median_score": 5.549222188864961,
+        "detection_rate": 0.3812636165577342,
+        "roc_auc": 0.6201843609518335
       }
     }
   },
-  "test_roc_auc": 0.5709333333333333,
-  "test_detection_rate": 0.37333333333333335,
-  "test_false_alarm_rate": 0.21333333333333335
+  "test_roc_auc": 0.563991274928775,
+  "test_detection_rate": 0.44551282051282054,
+  "test_false_alarm_rate": 0.2604166666666667
 }
