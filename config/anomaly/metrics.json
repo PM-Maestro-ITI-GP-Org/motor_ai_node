@@ -10,79 +10,79 @@
   "n_validation_fault": 311,
   "n_test_fault": 312,
   "n_features_candidate": 265,
-  "n_features_selected": 40,
+  "n_features_selected": 265,
   "primary_model": "isolation_forest",
   "isolation_forest": {
-    "threshold": 0.5022753115760432,
-    "percentile": 15.0,
+    "threshold": 0.4906896119880357,
+    "percentile": 14.5,
     "fallback": "",
     "validation": {
-      "false_alarm_rate": 0.14925373134328357,
-      "detection_rate": 0.5916398713826366,
-      "precision": 0.8598130841121495,
-      "f1": 0.700952380952381,
-      "roc_auc": 0.8724384508326535
+      "false_alarm_rate": 0.14427860696517414,
+      "detection_rate": 0.48231511254019294,
+      "precision": 0.8379888268156425,
+      "f1": 0.6122448979591837,
+      "roc_auc": 0.7573707027563149
     },
     "test": {
-      "false_alarm_rate": 0.2604166666666667,
-      "detection_rate": 0.44551282051282054,
-      "precision": 0.6495327102803738,
-      "f1": 0.5285171102661598,
-      "roc_auc": 0.563991274928775
+      "false_alarm_rate": 0.3333333333333333,
+      "detection_rate": 0.5,
+      "precision": 0.6190476190476191,
+      "f1": 0.5531914893617021,
+      "roc_auc": 0.5434361645299145
     },
     "by_condition": {
       "electrical": {
         "n_blocks": 752,
         "n_sessions": 3,
-        "median_score": 0.5160527428909845,
-        "detection_rate": 0.5651595744680851,
-        "roc_auc": 0.8110750337205761
+        "median_score": 0.4824633250003948,
+        "detection_rate": 0.46808510638297873,
+        "roc_auc": 0.7020270417264936
       },
       "mechanical": {
         "n_blocks": 459,
         "n_sessions": 2,
-        "median_score": 0.489785002263578,
-        "detection_rate": 0.46187363834422657,
-        "roc_auc": 0.5993914039144401
+        "median_score": 0.48327984592714845,
+        "detection_rate": 0.4749455337690632,
+        "roc_auc": 0.5543392544475185
       }
     }
   },
   "mahalanobis": {
-    "threshold": 7.428187011163492,
-    "percentile": 6.0,
+    "threshold": 19.29009403217473,
+    "percentile": 7.0,
     "fallback": "",
     "validation": {
-      "false_alarm_rate": 0.05970149253731343,
+      "false_alarm_rate": 0.06965174129353234,
       "detection_rate": 1.0,
-      "precision": 0.9628482972136223,
-      "f1": 0.9810725552050473,
-      "roc_auc": 0.9978883716465903
+      "precision": 0.9569230769230769,
+      "f1": 0.9779874213836477,
+      "roc_auc": 0.9871862552190814
     },
     "test": {
-      "false_alarm_rate": 0.22916666666666666,
-      "detection_rate": 0.38461538461538464,
-      "precision": 0.6451612903225806,
-      "f1": 0.4819277108433735,
-      "roc_auc": 0.5845241274928775
+      "false_alarm_rate": 0.17708333333333334,
+      "detection_rate": 0.36538461538461536,
+      "precision": 0.6909090909090909,
+      "f1": 0.4779874213836478,
+      "roc_auc": 0.5986912393162394
     },
     "by_condition": {
       "electrical": {
         "n_blocks": 752,
         "n_sessions": 3,
-        "median_score": 19.287920886752175,
-        "detection_rate": 0.9920212765957447,
-        "roc_auc": 0.9408339859896445
+        "median_score": 31.992292027228103,
+        "detection_rate": 0.988031914893617,
+        "roc_auc": 0.9287108950093547
       },
       "mechanical": {
         "n_blocks": 459,
         "n_sessions": 2,
-        "median_score": 5.549222188864961,
-        "detection_rate": 0.3812636165577342,
-        "roc_auc": 0.6201843609518335
+        "median_score": 12.287100421643347,
+        "detection_rate": 0.3442265795206972,
+        "roc_auc": 0.6225278568596264
       }
     }
   },
-  "test_roc_auc": 0.563991274928775,
-  "test_detection_rate": 0.44551282051282054,
-  "test_false_alarm_rate": 0.2604166666666667
+  "test_roc_auc": 0.5434361645299145,
+  "test_detection_rate": 0.5,
+  "test_false_alarm_rate": 0.3333333333333333
 }

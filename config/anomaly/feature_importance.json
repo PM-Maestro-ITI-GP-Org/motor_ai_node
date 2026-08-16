@@ -2,7 +2,7 @@
   "method": "random_forest on normal-vs-fault (development slices)",
   "fitted_on": "development slices only",
   "n_candidates": 265,
-  "n_selected": 40,
+  "n_selected": 265,
   "ranking": {
     "i_balance_3": 0.06984530496541577,
     "PF2": 0.0614445498625023,
