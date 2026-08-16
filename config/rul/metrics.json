@@ -3,16 +3,16 @@
   "data_status": "provisional",
   "data_note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
   "split_strategy": "interleaved",
-  "n_development": 2247,
-  "n_validation": 634,
-  "n_test": 599,
+  "n_development": 1720,
+  "n_validation": 485,
+  "n_test": 459,
   "n_units": 1,
   "n_time_indices": 5,
   "life_index": 4,
   "n_features_candidate": 265,
   "n_features_selected": 10,
   "windows_pooled": 20,
-  "n_windows": 69413,
+  "n_windows": 53280,
   "bands": [
     "healthy",
     "early",
@@ -20,20 +20,20 @@
     "failed"
   ],
   "validation": {
-    "spearman": 0.7355952903681653,
-    "exact_band": 0.7271293375394322,
-    "within_one_band": 0.9873817034700315,
-    "health_mae": 0.08734227129337539,
-    "rul_mae_months": 0.34936908517350157,
-    "n_rows": 634
+    "spearman": 0.7632591513471152,
+    "exact_band": 0.7237113402061855,
+    "within_one_band": 0.9896907216494846,
+    "health_mae": 0.08582474226804124,
+    "rul_mae_months": 0.34329896907216495,
+    "n_rows": 485
   },
   "test": {
-    "spearman": 0.8331461134841686,
-    "exact_band": 0.8430717863105175,
-    "within_one_band": 0.989983305509182,
-    "health_mae": 0.07220367278797997,
-    "rul_mae_months": 0.2888146911519199,
-    "n_rows": 599
+    "spearman": 0.8300331460323105,
+    "exact_band": 0.8322440087145969,
+    "within_one_band": 0.9891067538126361,
+    "health_mae": 0.07829520697167756,
+    "rul_mae_months": 0.31318082788671026,
+    "n_rows": 459
   },
   "leave_one_recording_out": {
     "n_recordings": 15,
@@ -42,8 +42,8 @@
     "spearman": 0.9571162043197412,
     "rul_mae_months": 0.08333333333333333
   },
-  "test_spearman": 0.8331461134841686,
-  "test_health_mae": 0.07220367278797997,
+  "test_spearman": 0.8300331460323105,
+  "test_health_mae": 0.07829520697167756,
   "loro_within_one_band": 1.0,
   "loro_exact_band": 0.9333333333333333,
   "loro_spearman": 0.9571162043197412

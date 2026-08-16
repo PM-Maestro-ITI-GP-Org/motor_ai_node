@@ -1,26 +1,26 @@
 {
   "primary_model": "isolation_forest",
-  "threshold": 0.4906896119880357,
-  "percentile": 14.5,
+  "threshold": 0.500486089099966,
+  "percentile": 12.5,
   "strategy": "max_false_alarm",
   "calibrated_on": "validation normals",
   "direction": "higher_is_anomalous",
   "development_score_summary": {
-    "min": 0.38258361101403027,
-    "p50": 0.434147525618222,
-    "p95": 0.5875054990462963,
-    "max": 0.6657473814128545
+    "min": 0.3877165445674125,
+    "p50": 0.4386871400468588,
+    "p95": 0.5902806900497285,
+    "max": 0.6825156024826329
   },
   "operating_point_validation": {
-    "false_alarm_rate": 0.14427860696517414,
-    "detection_rate": 0.48231511254019294,
-    "precision": 0.8379888268156425,
-    "f1": 0.6122448979591837,
-    "roc_auc": 0.7573707027563149
+    "false_alarm_rate": 0.12987012987012986,
+    "detection_rate": 0.47058823529411764,
+    "precision": 0.8484848484848485,
+    "f1": 0.6054054054054054,
+    "roc_auc": 0.7317472443522863
   },
   "alternative_model": {
     "kind": "mahalanobis",
-    "threshold": 19.29009403217473,
+    "threshold": 18.623385209635853,
     "runs_without_sklearn": true
   }
 }
