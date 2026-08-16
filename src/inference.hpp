@@ -40,21 +40,9 @@
 #include "feature_extraction.hpp"
 #include "io_utils.hpp"
 #include "models.hpp"
+#include "pipeline.hpp"
 
 namespace inference {
-
-// np.median: the mean of the two middle values on an even count. The host pools
-// with np.median, so anything else here is a silent disagreement with training.
-inline double median(std::vector<double> v)
-{
-    if (v.empty()) return 0.0;
-    const size_t mid = v.size() / 2;
-    std::nth_element(v.begin(), v.begin() + mid, v.end());
-    const double hi = v[mid];
-    if (v.size() % 2) return hi;
-    const double lo = *std::max_element(v.begin(), v.begin() + mid);
-    return 0.5 * (lo + hi);
-}
 
 class Engine {
 public:
@@ -197,6 +185,13 @@ private:
     // Windows are spaced evenly across the file rather than taken from the
     // front, so a file that does span a range is represented end to end. That
     // is the same rule data_building uses when it limits windows per file.
+    // One data.csv -> one feature vector, pooled over the windows it contains.
+    //
+    // The window loop, the even spacing and the centred context slice all live
+    // in pipeline.hpp, shared with rpi_pipeline's motor_infer and with the
+    // parity test. This file used to carry its own copy. Three copies is how
+    // the shipping binary came to compute different features from the ones the
+    // models were trained on while the parity test went on passing.
     bool extractOne(const std::string &_csvPath, FeatureMap &_out)
     {
         auto table = load_csv_table(_csvPath);
@@ -215,63 +210,19 @@ private:
         const size_t skip = startup_skip(all.at("I1").size(), cfg_, cfg_.skip_startup_ms);
         if (skip) all = slice(all, skip, all.at("I1").size() - skip);
 
-        const size_t nRows = all.at("I1").size();
-        if (static_cast<int>(nRows) < cfg_.window_samples) {
-            std::cerr << "[AI-node] " << nRows << " rows after startup skip, need "
-                      << cfg_.window_samples << std::endl;
+        if (all.at("I1").size() < static_cast<size_t>(cfg_.window_samples)) {
+            std::cerr << "[AI-node] " << all.at("I1").size()
+                      << " rows after startup skip, need " << cfg_.window_samples
+                      << std::endl;
             return false;
         }
 
-        const int step = cfg_.step > 0 ? cfg_.step : cfg_.window_samples;
-        std::vector<size_t> starts;
-        for (size_t s = 0; s + static_cast<size_t>(cfg_.window_samples) <= nRows; s += step)
-            starts.push_back(s);
-        if (starts.empty()) return false;
-
-        if (static_cast<int>(starts.size()) > windowsPerRead_) {
-            std::vector<size_t> picks;
-            const double span = static_cast<double>(starts.size() - 1);
-            for (int i = 0; i < windowsPerRead_; ++i) {
-                const double f = (windowsPerRead_ == 1)
-                                     ? 0.0
-                                     : span * i / (windowsPerRead_ - 1);
-                picks.push_back(starts[static_cast<size_t>(std::llround(f))]);
-            }
-            starts = picks;
-        }
-
-        std::map<std::string, std::vector<double> > acc;
-        int ok = 0;
-        for (size_t s : starts) {
-            Channels window = slice(all, s, static_cast<size_t>(cfg_.window_samples));
-            Channels context;
-            if (cfg_.context_samples > 0 &&
-                nRows >= static_cast<size_t>(cfg_.context_samples)) {
-                // Centred on the window and clamped, matching run_batch(). Off
-                // centre context changes every spectral feature.
-                const size_t half = static_cast<size_t>(cfg_.context_samples) / 2;
-                const size_t mid = s + static_cast<size_t>(cfg_.window_samples) / 2;
-                size_t c0 = (mid > half) ? mid - half : 0;
-                c0 = std::min(c0, nRows - static_cast<size_t>(cfg_.context_samples));
-                context = slice(all, c0, static_cast<size_t>(cfg_.context_samples));
-            }
-            double rpm = 0.0, fe = 0.0;
-            FeatureMap f = extract_all(window, context, cfg_, rpm, fe);
-            if (f.empty()) continue;
-            for (std::map<std::string, double>::const_iterator it = f.begin();
-                 it != f.end(); ++it)
-                acc[it->first].push_back(it->second);
-            ++ok;
-        }
-        if (ok == 0) {
+        PooledResult r = pooled_features(all, cfg_, windowsPerRead_);
+        if (r.n_pooled == 0) {
             std::cerr << "[AI-node] every window rejected in " << _csvPath << std::endl;
             return false;
         }
-
-        _out.clear();
-        for (std::map<std::string, std::vector<double> >::iterator it = acc.begin();
-             it != acc.end(); ++it)
-            _out[it->first] = median(it->second);
+        _out = r.features;
         return true;
     }
 
@@ -286,7 +237,7 @@ private:
         FeatureMap out;
         for (std::map<std::string, std::vector<double> >::iterator it = acc.begin();
              it != acc.end(); ++it)
-            out[it->first] = median(it->second);
+            out[it->first] = median_of(it->second);
         return out;
     }
 
