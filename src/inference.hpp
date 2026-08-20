@@ -116,10 +116,22 @@ public:
         std::vector<std::string> missing;
         const double score = anomaly_.score(anomalyIn_.vectorise(pooled_, &missing));
         warnMissing("anomaly", missing);
-        const bool bad = anomaly_.is_anomalous(score);
+
+        // The threshold belongs to a ring DEPTH, because poolRing medians the
+        // features and that changes the score distribution's shape. While the
+        // ring is still filling, the vector being scored is not the one the
+        // ring threshold was calibrated on, so score it as the shallow case
+        // rather than reporting a verdict the calibration does not support.
+        const int depth = static_cast<int>(ring_.size());
+        const double thr = anomaly_.threshold_for(depth);
+        const bool bad = score > thr;
         std::cout << "[AI-node] anomaly " << (bad ? "anomaly" : "normal")
-                  << "  score " << score << " vs " << anomaly_.threshold
-                  << "  (" << ring_.size() << " window(s) pooled)" << std::endl;
+                  << "  score " << score << " vs " << thr
+                  << "  (" << depth << " window(s) pooled)";
+        if (!anomaly_.threshold_is_calibrated_for(depth))
+            std::cout << "  [ring filling: threshold calibrated for "
+                      << anomaly_.pool_windows_assumed << ", verdict provisional]";
+        std::cout << std::endl;
         return bad ? "anomaly" : "normal";
     }
 

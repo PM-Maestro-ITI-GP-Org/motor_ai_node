@@ -4,9 +4,9 @@
   "fs_vib": 20000,
   "window_ms": 50,
   "overlap_ms": 0,
-  "context_ms": 200,
+  "context_ms": 1000,
   "window_samples": 1000,
-  "context_samples": 4000,
+  "context_samples": 20000,
   "step": 1000,
   "skip_startup_ms": 300,
   "column_map": {

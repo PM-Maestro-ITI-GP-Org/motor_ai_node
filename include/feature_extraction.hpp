@@ -318,7 +318,14 @@ inline void extract_mcsa(const std::vector<double>& I1, double rpm,
     if (s.freqs.size() < 3) return;
 
     double fr = rpm / 60.0, fe = c.pole_pairs * fr;
-    double hw = std::max(2.0, s.freqs[1] - s.freqs[0]);
+    // Half-width must be narrower than the sideband spacing or the search
+    // around fe +/- fr also catches fe. fr/2 is the widest that cannot; the bin
+    // width is the floor because no search resolves below it, and 2.0 Hz stays
+    // the cap. Must match extract_mcsa in host_pipeline/data_building.ipynb --
+    // this formula lives in two languages and there is no parity test running
+    // to catch a drift (make_mock_data.py still emits the old logger format).
+    double binw = s.freqs[1] - s.freqs[0];
+    double hw = std::max(binw, std::min(2.0, fr / 2.0));
     double a_fe = peak_near(s, fe, hw);
     double a_lsb = peak_near(s, fe - fr, hw);
     double a_usb = peak_near(s, fe + fr, hw);
@@ -364,7 +371,8 @@ inline void extract_spectral_ratios(const std::vector<double>& I1, double rpm,
     Spectrum s = compute_fft(I1, c.fs);
     if (s.freqs.size() < 3) return;
     double fr = rpm / 60.0, fe = c.pole_pairs * fr;
-    double hw = std::max(2.0, s.freqs[1] - s.freqs[0]);
+    double binw = s.freqs[1] - s.freqs[0];      // same rule as extract_mcsa
+    double hw = std::max(binw, std::min(2.0, fr / 2.0));
     double e_fe = band_energy(s, fe - hw, fe + hw) + c.eps;
     out["ratio_1xRPM_to_fe"] = band_energy(s, fr - hw, fr + hw) / e_fe;
     out["ratio_2x_to_fe"] = band_energy(s, 2 * fe - hw, 2 * fe + hw) / e_fe;
