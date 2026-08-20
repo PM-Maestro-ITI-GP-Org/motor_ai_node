@@ -259,6 +259,7 @@ struct RulModel {
     std::vector<double> coef;
     double intercept = 0.0;
     std::vector<double> iso_x, iso_y;                 // continuous model only
+    std::vector<double> sev_x, sev_y;                 // optional severity calibration
     std::vector<std::string> band_names;              // band model only
     std::vector<double> band_health;
     double life_index = 0.0;
@@ -282,7 +283,14 @@ struct RulModel {
                 throw std::runtime_error("rul: band names and health differ in length");
             if (band_health.empty())
                 throw std::runtime_error("rul: band table is empty");
-        } else if (j.contains("isotonic")) {
+        }
+        if (j.contains("severity_calibration")) {
+            sev_x = j.at("severity_calibration").at("x").get<std::vector<double>>();
+            sev_y = j.at("severity_calibration").at("y").get<std::vector<double>>();
+            if (sev_x.size() != sev_y.size())
+                throw std::runtime_error("severity_calibration x and y differ in length");
+        }
+        if (j.contains("isotonic") && !j.contains("bands")) {
             iso_x = j.at("isotonic").at("x").get<std::vector<double>>();
             iso_y = j.at("isotonic").at("y").get<std::vector<double>>();
         }
@@ -298,9 +306,44 @@ struct RulModel {
 
     // The ridge output before it is snapped to a band. Exposed because it says
     // how close a verdict sat to a boundary, which the band alone hides.
+    // Monotone piecewise-linear lookup, linear outside the knots. Shared by the
+    // severity calibration below and the isotonic health curve, which were two
+    // copies of the same seven lines.
+    static double interp(const std::vector<double>& xs, const std::vector<double>& ys,
+                         double x, bool clamp_ends) {
+        if (xs.size() < 2) return x;
+        if (x <= xs.front())
+            return clamp_ends ? ys.front()
+                              : ys.front() + (x - xs.front()) *
+                                    (ys[1] - ys[0]) / (xs[1] - xs[0]);
+        if (x >= xs.back()) {
+            size_t n = xs.size();
+            return clamp_ends ? ys.back()
+                              : ys.back() + (x - xs.back()) *
+                                    (ys[n - 1] - ys[n - 2]) / (xs[n - 1] - xs[n - 2]);
+        }
+        size_t hi = std::lower_bound(xs.begin(), xs.end(), x) - xs.begin();
+        size_t lo = hi ? hi - 1 : 0;
+        double span = xs[hi] - xs[lo];
+        double t = span > 0 ? (x - xs[lo]) / span : 0.0;
+        return ys[lo] + t * (ys[hi] - ys[lo]);
+    }
+
+    // band() is round(severity), so the cuts are fixed at the half-integers and
+    // the only way to give a band room is to move the severities. A linear
+    // severity cannot do it: with four bands and only a scale and an offset,
+    // widening one band's margin necessarily narrows its neighbour's. Measured
+    // 2026-08-20 -- rebalancing took healthy from 0.031 to 0.194 of margin and
+    // pushed 8Rp and 2Rp down in exchange, for no net gain on the device.
+    //
+    // sev_x/sev_y is an optional monotone curve that maps raw severity onto the
+    // band scale, with one knot per band, so every band centre can sit on its
+    // own integer at once. Absent from the JSON, this is a no-op and the model
+    // behaves exactly as before.
     double severity(const std::vector<double>& z) const {
         double raw = intercept;
         for (size_t i = 0; i < coef.size() && i < z.size(); i++) raw += coef[i] * z[i];
+        if (sev_x.size() >= 2) return interp(sev_x, sev_y, raw, /*clamp_ends=*/false);
         return raw;
     }
 
@@ -323,13 +366,7 @@ struct RulModel {
 
         double raw = severity(z);
         if (iso_x.empty()) return std::min(1.0, std::max(0.0, raw));
-        if (raw <= iso_x.front()) return iso_y.front();          // clipped, as in Python
-        if (raw >= iso_x.back()) return iso_y.back();
-        size_t hi = std::lower_bound(iso_x.begin(), iso_x.end(), raw) - iso_x.begin();
-        size_t lo = hi ? hi - 1 : 0;
-        double span = iso_x[hi] - iso_x[lo];
-        double t = span > 0 ? (raw - iso_x[lo]) / span : 0.0;
-        double h = iso_y[lo] + t * (iso_y[hi] - iso_y[lo]);
+        double h = interp(iso_x, iso_y, raw, /*clamp_ends=*/true);   // clipped, as in Python
         return std::min(1.0, std::max(0.0, h));
     }
 
