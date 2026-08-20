@@ -4,12 +4,12 @@
   "protocol": "leave-one-recording-out, 63 recordings",
   "decoded_as": "clip(round(severity), 0, 3) -- identical to models.hpp band()",
   "exact_band_per_recording": 1.0,
-  "exact_band_per_ring_verdict": 0.9352681747047944,
+  "exact_band_per_ring_verdict": 0.9620145113102859,
   "per_band_ring_verdict": {
-    "healthy": 0.9405162738496072,
-    "early": 0.9972200158856235,
-    "mid": 0.7637564196625092,
-    "failed": 0.9853587115666179
+    "healthy": 0.9612794612794613,
+    "early": 0.9769658459094519,
+    "mid": 0.9082905355832722,
+    "failed": 0.9890190336749634
   },
   "granularity_note": "a recording is the median of ~110 ring vectors, i.e. the whole 3-minute run; the node emits one verdict per ring window every 1.3 s from 26 s of history, which is the per_ring_verdict row. Verified on the real binary: 47/55 correct across 5 recordings.",
   "within_one_band": 1.0,

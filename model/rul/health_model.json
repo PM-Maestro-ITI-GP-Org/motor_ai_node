@@ -52,6 +52,21 @@
     "alpha": 3.1622776601683795,
     "target": "band index 0-3"
   },
+  "severity_calibration": {
+    "x": [
+      0.18909403193758112,
+      0.9782204555528582,
+      1.673354717272756,
+      3.1459289493446123
+    ],
+    "y": [
+      0.0,
+      1.0,
+      2.0,
+      3.0
+    ],
+    "note": "monotone piecewise-linear map from raw severity onto the band scale, one knot at each band's training median, so every band centre sits on its own integer and gets the full half-bin either side. An affine rescale cannot do this with four bands and two parameters. models.hpp extrapolates linearly outside the knots."
+  },
   "bands": {
     "names": [
       "healthy",
