@@ -177,7 +177,9 @@ struct Classifier {
 struct AnomalyDetector {
     std::vector<double> mean;
     std::vector<std::vector<double>> precision;
-    double threshold = 0.0;
+    double threshold = 0.0;          // for a POOLED vector, ring depth pool_windows_assumed
+    double threshold_single = 0.0;   // for ONE unpooled capture
+    int pool_windows_assumed = 1;
     std::string direction = "higher_is_anomalous";
     std::string primary_model;
 
@@ -188,6 +190,7 @@ struct AnomalyDetector {
         precision = m.at("precision").get<std::vector<std::vector<double>>>();
         threshold = m.at("threshold").get<double>();
         direction = m.value("direction", direction);
+        threshold_single = threshold;
 
         // threshold.json is authoritative when its primary model is this one;
         // otherwise the Mahalanobis threshold from the model file is used and
@@ -198,7 +201,22 @@ struct AnomalyDetector {
             tf >> t;
             primary_model = t.value("primary_model", "");
             if (primary_model == "mahalanobis") threshold = t.value("threshold", threshold);
+            pool_windows_assumed = t.value("pool_windows_assumed", 1);
+            threshold_single = t.value("threshold_single_capture", threshold);
         }
+    }
+
+    // The ring medians FEATURES before scoring, so the score distribution has a
+    // different shape at every ring depth and one threshold cannot serve both.
+    // Measured 2026-08-20: the depth-20 threshold applied to a single capture
+    // flags 30 % of healthy ones. Only depths 1 and pool_windows_assumed are
+    // calibrated; anything else is a guess and says so.
+    double threshold_for(int pool_windows) const {
+        if (pool_windows <= 1) return threshold_single;
+        return threshold;
+    }
+    bool threshold_is_calibrated_for(int pool_windows) const {
+        return pool_windows <= 1 || pool_windows == pool_windows_assumed;
     }
 
     double score(const std::vector<double>& z) const {
@@ -215,6 +233,9 @@ struct AnomalyDetector {
     }
 
     bool is_anomalous(double s) const { return s > threshold; }
+    bool is_anomalous(double s, int pool_windows) const {
+        return s > threshold_for(pool_windows);
+    }
 };
 
 // ── RUL: scaler -> ridge -> health band -> remaining life ─────────────
