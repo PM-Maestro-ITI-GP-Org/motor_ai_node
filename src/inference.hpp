@@ -49,9 +49,11 @@ public:
     // Loaded once at startup. A missing or malformed artefact is fatal here
     // rather than at the first signal: a node that answers "unknown" forever
     // looks like the server's fault, and the server has no way to tell.
-    bool load(const std::string &_root, int _poolWindows, int _windowsPerRead)
+    bool load(const std::string &_root, int _poolWindows, int _windowsPerRead,
+              double _minCurrentRms = 1.0)
     {
         poolWindows_ = _poolWindows > 0 ? _poolWindows : 1;
+        minCurrentRms_ = _minCurrentRms;
         windowsPerRead_ = _windowsPerRead > 0 ? _windowsPerRead : 20;
         try {
             cfg_ = load_extraction_config(_root + "/config/feature_extraction.json");
@@ -100,6 +102,32 @@ public:
 
         FeatureMap f;
         if (!extractOne(_csvPath, f)) return false;
+
+        // A STOPPED MOTOR IS NOT A HEALTHY ONE, and it is not a faulty one
+        // either. Every feature these models use is a ratio between phase
+        // currents, and with the shaft still those ratios are computed on
+        // noise. Measured on data/fully_stoped_1Rp.csv, a motor carrying the
+        // worst fault in the set: i_imbalance reads 0.188 stopped against 0.179
+        // for the same fault running, so the garbage lands squarely inside the
+        // range of a real reading and nothing downstream can notice. All three
+        // stages answered at once and disagreed -- "anomaly", "normal" and
+        // "healthy" on the same window.
+        //
+        // The models were never shown this regime: 8 % of training blocks are
+        // the zero-speed stretches inside each scenario, carrying whatever
+        // label the recording had, which is how a stopped 1Rp motor comes out
+        // "healthy".
+        //
+        // refresh() returning false is the node's existing way of saying
+        // nothing -- the same path a short or unreadable window takes -- so no
+        // new vocabulary enters the result protocol and the server times out as
+        // it already does.
+        if (!isRunning(f)) {
+            std::cerr << "[AI-node] motor not running (phase current rms below "
+                      << minCurrentRms_ << ") -- no verdict for " << _csvPath
+                      << std::endl;
+            return false;
+        }
 
         ring_.push_back(f);
         while (static_cast<int>(ring_.size()) > poolWindows_) ring_.pop_front();
@@ -238,6 +266,27 @@ private:
         return true;
     }
 
+    // The three phase-current RMS features are what the extraction already
+    // computes; the largest of them is used so a single dead channel cannot
+    // silence a running motor. Threshold is a config value because the shunt
+    // gain is rig-specific: on this rig a stopped motor reads 0.15-0.18 and a
+    // running one has a median of 10.1, so 1.0 sits an order of magnitude clear
+    // of both.
+    bool isRunning(const FeatureMap &_f) const
+    {
+        double best = 0.0;
+        bool sawAny = false;
+        const char *keys[3] = {"I1_rms", "I2_rms", "I3_rms"};
+        for (int i = 0; i < 3; i++) {
+            FeatureMap::const_iterator it = _f.find(keys[i]);
+            if (it == _f.end()) continue;
+            sawAny = true;
+            if (it->second > best) best = it->second;
+        }
+        if (!sawAny) return true;      // cannot tell: do not block the pipeline
+        return best >= minCurrentRms_;
+    }
+
     FeatureMap poolRing() const
     {
         if (ring_.size() == 1) return ring_.front();
@@ -263,6 +312,7 @@ private:
     FeatureMap pooled_;
     int poolWindows_ = 20;
     int windowsPerRead_ = 20;
+    double minCurrentRms_ = 1.0;
 
     ino_t lastIno_ = 0;
     time_t lastMtime_ = 0;

@@ -65,6 +65,7 @@ struct NodeConfig {
     // 1.3 s at 20 kHz -- one speed -- and the models were fitted on features
     // pooled across a full speed sweep. 1 disables pooling entirely.
     int poolWindows{20};
+    double minCurrentRms{1.0};
     int         sig[kStageCount];
 
     NodeConfig()
@@ -230,6 +231,9 @@ void loadConfig(NodeConfig &_cfg)
         if      (key == "data_dir")    _cfg.dataDir = val;
         else if (key == "ai_pid_file") _cfg.pidFile = val;
         else if (key == "model_root")  _cfg.modelRoot = val;
+        else if (key == "min_current_rms") {
+            _cfg.minCurrentRms = std::atof(val.c_str());
+        }
         else if (key == "pool_windows") {
             const int n = std::atoi(val.c_str());
             if (n < 1) std::cerr << "[AI-node] config: pool_windows must be >= 1 -- "
@@ -393,7 +397,8 @@ int main()
     // it: once the pid is published the server may signal at any moment, and a
     // node that answers "unknown" to everything is indistinguishable from a
     // broken server. Failing here is loud and immediate instead.
-    if (!g_engine.load(cfg.modelRoot, cfg.poolWindows, /*windowsPerRead=*/20))
+    if (!g_engine.load(cfg.modelRoot, cfg.poolWindows, /*windowsPerRead=*/20,
+                        cfg.minCurrentRms))
         return 1;
 
     // Shutdown. SIGTERM is deliberately absent: by default it is the RUL
