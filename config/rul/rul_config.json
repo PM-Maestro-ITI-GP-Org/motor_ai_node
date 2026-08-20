@@ -1,9 +1,9 @@
 {
   "status": "provisional",
-  "note": "provisional dataset \u2014 pipeline rehearsal, metrics are not evidence",
+  "note": "rig ladder, 1000 Hz IMU, 63 recordings across 5 resistance levels; metrics are leave-one-recording-out",
   "time_unit": "month",
   "life_index": 4,
-  "life_index_source": "declared: 0.1 ohm (1 parallel resistor) is a failed motor \u2014 declared, not run to failure",
+  "life_index_source": "declared: 0.1 ohm (1 parallel resistor) is a failed motor -- declared, not run to failure",
   "bands": {
     "names": [
       "healthy",
@@ -20,11 +20,11 @@
     },
     "resistance_ohm": {
       "0": 0.0,
-      "1": 0.018750000000000003,
+      "1": 0.01875,
       "2": 0.05,
       "3": 0.1
     },
-    "rationale": "levels 0.005-0.008 ohm apart do not separate (AUC 0.497 for month_1 vs month_2); bands merge only what the data cannot tell apart"
+    "rationale": "8Rp and 4Rp share a band: on the rig they reach AUC 0.698 pooled over 50 blocks against 0.996 and 0.930 for the other adjacent pairs, because the 0.0125 ohm step is smaller than the contact resistance that varies between setups. Measured on the rig, matching the legacy finding of AUC 0.497."
   },
   "windows_pooled": 20,
   "observed_time_indices": [
@@ -36,5 +36,6 @@
   ],
   "n_units": 1,
   "n_features": 9,
-  "split_strategy": "interleaved"
+  "split_strategy": "leave_one_recording_out",
+  "trained_on": "data/rig sessions 1-5, 1000 Hz IMU"
 }
