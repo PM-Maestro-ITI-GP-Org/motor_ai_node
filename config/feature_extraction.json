@@ -14,11 +14,11 @@
     "Current_0": "I1",
     "Current_1": "I2",
     "Current_2": "I3",
-    "Speed_volt_cmd": "speed_cmd",
-    "Volt_0": "V1",
-    "Volt_1": "V2",
-    "Volt_2": "V3",
-    "DC_bus_volt": "vdc",
+    "Volt_0": "speed_cmd",
+    "Volt_1": "V1",
+    "Volt_2": "V2",
+    "DC_bus_volt": "V3",
+    "Speed_volt_cmd": "vdc",
     "vib_x": "ax",
     "vib_y": "ay",
     "vib_z": "az"
@@ -470,5 +470,20 @@
     "PF_mean",
     "vdc_sag",
     "vdc_ripple"
-  ]
+  ],
+  "column_map_note": "MAPPED TO THE SERVER'S HEADER, WHICH DOES NOT MATCH ITS OWN DATA. motor_ai_server writes the columns in the same order as the training recordings (timestamp, I1..I3, speed_cmd, V1..V3, vdc, ax, ay, az) but emits a header that names them in a different order, so the column after the currents is labelled Volt_0 while it carries the speed command, and the one labelled Speed_volt_cmd carries the DC bus. Verified 2026-08-21 on a live 26000-row window: relabelled in training order all 8 electrical columns match the rig profile, and the column the header calls Speed_volt_cmd is steady at 2633 +- 13 which is a DC bus, not a command. Currents are unaffected either way -- they occupy the same positions in both orders -- which is why the anomaly stage (4 balance features, current only) was correct on the device while classification and RUL, which need PF/Z from the voltages, were fed the speed command as a phase voltage. THIS MAPPING IS A COMPENSATION FOR THAT BUG. If the server is ever corrected to emit a truthful header, this file must be reverted to the training order or the node breaks in exactly the same way, silently. The training-order map is kept below as column_map_training_order.",
+  "column_map_training_order": {
+    "timestamp": "t_raw",
+    "Current_0": "I1",
+    "Current_1": "I2",
+    "Current_2": "I3",
+    "Speed_volt_cmd": "speed_cmd",
+    "Volt_0": "V1",
+    "Volt_1": "V2",
+    "Volt_2": "V3",
+    "DC_bus_volt": "vdc",
+    "vib_x": "ax",
+    "vib_y": "ay",
+    "vib_z": "az"
+  }
 }

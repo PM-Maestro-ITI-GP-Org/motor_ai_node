@@ -4,9 +4,17 @@ The inference half of the QNX motor demo's AI pipeline. It runs on the Linux
 guest (guest-2), beside [motor_ai_server][server], and sleeps until that
 service asks it for a verdict.
 
-Three real models, no ML runtime: anomaly detection by Mahalanobis distance,
-fault classification by a small 1-D CNN, and remaining useful life by a ridge
-fit onto four health bands. They are JSON, evaluated by plain arithmetic in
+**Verified on hardware 2026-08-21, tagged `v0.1.0-rig`.** On an aarch64 target
+against a live motor with 0.1 Ω of added series resistance — the most severe
+fault in the training set — all three stages agreed: `anomaly` / `electrical` /
+`failed`, with an anomaly score of 29–36 sitting inside the measured 1Rp
+distribution (p5 21.2, median 27.6, p95 41.8). It places the fault at the right
+severity, not merely detects it.
+
+Three real models, no ML runtime: anomaly detection by Mahalanobis distance on
+four current-balance features, binary fault classification (`normal` vs
+`electrical`) as a one-layer network, and remaining useful life by a ridge onto
+four health bands with a piecewise severity calibration. They are JSON, evaluated by plain arithmetic in
 `include/models.hpp` — no TensorFlow, no scikit-learn, nothing to install.
 Trained by [the AI repository][ai]; `model/` and `config/` here are the pinned
 copies that ship.
@@ -105,6 +113,48 @@ The cost is that a verdict describes the motor over the last ~26 s rather than
 strictly the window just received. For RUL that is the intended reading; the
 server's own `rul_interval_ms` documentation makes the same argument. Set
 `pool_windows = 1` for strict per-window scoring.
+
+## The column map does not match the server's header, on purpose
+
+`motor_ai_server` writes its CSV columns in **training order** but emits a header
+naming them in a **different** order. This node maps channels by name, so
+`config/feature_extraction.json` compensates:
+
+| the header says | it actually carries |
+|---|---|
+| `Volt_0` | the **speed command** |
+| `Volt_1` / `Volt_2` / `DC_bus_volt` | `Volt_0` / `Volt_1` / `Volt_2` |
+| `Speed_volt_cmd` | the **DC bus** |
+
+Confirmed on a live 26 000-row window: relabelled in training order all eight
+electrical columns match the rig profile, and the column called
+`Speed_volt_cmd` is steady at 2633 ± 13 — a DC bus, not a command.
+
+**Currents occupy the same positions in both orders.** That is the whole
+diagnostic story: the anomaly stage uses four balance features and nothing else,
+so it was right throughout, while classification and RUL — which need `PF` and
+`Z` from the voltages — were computing power factor from the speed command.
+`normal, confidence 1.0` on a failed motor was a logistic regression saturating
+on nonsense.
+
+**IF THE SERVER IS EVER FIXED, THIS FILE MUST BE REVERTED** to the training
+order or the node breaks identically and silently. The training-order map is
+kept in the file as `column_map_training_order`, and the reasoning beside it in
+`column_map_note`. The real fix is one line upstream, and the server also omits
+`seq` — which is how dropped samples would be detected, and exactly the class of
+bug it would have caught.
+
+## Known hole: a stopped motor gets a confident answer
+
+With the shaft still, every feature is a ratio of phase currents computed on
+noise. `i_imbalance` reads **0.188** on a stopped 1Rp motor against **0.179** for
+the same fault running, so the garbage lands inside the range of a real reading.
+All three stages answer and disagree: `anomaly`, `normal`, `healthy` — on a
+failed motor.
+
+There is no guard in `v0.1.0-rig`. One was written and measured (refuse below a
+minimum phase-current RMS; 7.96 % of blocks refused, median recording still
+93.1 % usable) and dropped as unwanted.
 
 ## The anomaly stage is not trustworthy on one window yet
 

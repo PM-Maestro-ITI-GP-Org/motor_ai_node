@@ -2,25 +2,25 @@
   "method": "logistic regression coefficients on standardised features",
   "note": "positive weight = raises P(electrical)",
   "ranking": [
-    "i_balance_2",
     "i_balance_3",
-    "PF2",
+    "i_balance_2",
     "Z1",
-    "i_balance_1",
     "Z_imbalance",
-    "i_imbalance",
+    "i_balance_1",
     "Z2",
+    "i_imbalance",
+    "PF2",
     "PF1"
   ],
   "coefficients": {
-    "i_balance_1": -2.0624541503738536,
-    "i_balance_2": -9.954844758716716,
-    "i_balance_3": 5.492238550466261,
-    "i_imbalance": 0.5205762734805333,
-    "PF1": -0.37771145733636685,
-    "PF2": 2.9762717794586075,
-    "Z1": 2.341845940955406,
-    "Z2": -0.47035337461264554,
-    "Z_imbalance": -2.0194546147949053
+    "i_balance_1": -1.7104183818731626,
+    "i_balance_2": -6.231321701672913,
+    "i_balance_3": 6.838742467114531,
+    "i_imbalance": 1.5032251994581918,
+    "PF1": -0.1984567837856669,
+    "PF2": 0.7504299087479508,
+    "Z1": 4.631793700686597,
+    "Z2": -1.5971008166313196,
+    "Z_imbalance": -1.9684510171377407
   }
 }
