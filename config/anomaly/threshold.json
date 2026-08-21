@@ -13,7 +13,7 @@
     "detection_4Rp": 0.8365921787709497,
     "detection_2Rp": 1.0,
     "roc_auc_8Rp": 0.9574849998744759,
-    "recordings_caught_zero_false_alarms": "46/46"
+    "recordings_caught_zero_false_alarms": "46/56"
   },
   "threshold_single_capture": 8.533933493863822,
   "single_capture_operating_point": {

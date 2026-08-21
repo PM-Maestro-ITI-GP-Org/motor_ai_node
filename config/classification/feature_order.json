@@ -7,5 +7,14 @@
   "PF2",
   "Z1",
   "Z2",
-  "Z_imbalance"
+  "Z_imbalance",
+  "ax_rms",
+  "ay_rms",
+  "az_rms",
+  "ax_std",
+  "ay_std",
+  "az_std",
+  "ax_p2p",
+  "ay_p2p",
+  "az_p2p"
 ]

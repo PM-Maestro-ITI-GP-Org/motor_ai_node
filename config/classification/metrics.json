@@ -3,22 +3,84 @@
   "data_status": "provisional",
   "classes": [
     "normal",
-    "electrical"
+    "electrical",
+    "mechanical"
   ],
-  "trained_on": "data/rig sessions 1-5, 1000 Hz IMU, 63 recordings",
-  "protocol": "leave-one-SESSION-out (5 sessions)",
-  "why_this_protocol": "leave-one-recording-out cannot distinguish this model from a session fingerprint: under it a VIBRATION-only control, which cannot see phase-current imbalance by physics, also scores AUC 0.996. Under leave-one-session-out that control collapses to 0.607 while this model stays at 1.000.",
-  "auc_recording": 1.0,
-  "auc_ring_verdict": 0.9898909916495993,
-  "accuracy_ring_verdict": 0.9584802193497846,
-  "false_alarms_recordings": "0/17",
-  "detection_recordings": "46/46",
-  "negative_control_vibration_auc": {
-    "leave_one_recording_out": 0.996,
-    "leave_one_session_out": 0.607
+  "trained_on": "data/rig sessions 1-6, 1000 Hz IMU",
+  "n_recordings": 73,
+  "pool_windows": 10,
+  "protocol": "leave-one-SESSION-out",
+  "features": {
+    "current": [
+      "i_balance_1",
+      "i_balance_2",
+      "i_balance_3",
+      "i_imbalance",
+      "PF1",
+      "PF2",
+      "Z1",
+      "Z2",
+      "Z_imbalance"
+    ],
+    "vibration": [
+      "ax_rms",
+      "ay_rms",
+      "az_rms",
+      "ax_std",
+      "ay_std",
+      "az_std",
+      "ax_p2p",
+      "ay_p2p",
+      "az_p2p"
+    ]
+  },
+  "why_vibration": "a mechanical fault does not move the current-balance features -- imbalance 0.010-0.028 across the mechanical recordings, inside the healthy range -- but raises broadband vibration to 1.7-2.5x healthy on every axis",
+  "leave_one_session_out": {
+    "accuracy_ring_verdict": 0.702932186120231,
+    "accuracy_recording": 0.7534246575342466,
+    "confusion_recording": [
+      [
+        9,
+        0,
+        8
+      ],
+      [
+        0,
+        46,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ]
+    ],
+    "note": "the honest split; mechanical recall is 0 % BY CONSTRUCTION because it exists in one session"
+  },
+  "leave_one_recording_out": {
+    "accuracy_ring_verdict": 0.9244877165176044,
+    "accuracy_recording": 0.9178082191780822,
+    "confusion_recording": [
+      [
+        12,
+        0,
+        5
+      ],
+      [
+        0,
+        46,
+        0
+      ],
+      [
+        1,
+        0,
+        9
+      ]
+    ],
+    "note": "UPPER BOUND -- same-day recordings stay in training"
   },
   "not_measured": [
-    "no mechanical fault exists at 1000 Hz, so the mechanical class is removed rather than predicted badly; restore it when one is recorded",
-    "every fault is added phase resistance"
+    "MECHANICAL IS ONE SESSION: every mechanical recording was made on 2026-08-21, so the class and the day cannot be separated. Its column here is an upper bound, not a measurement.",
+    "two mechanical recordings (A_1, B_1) were hand-damped and are retired"
   ]
 }
