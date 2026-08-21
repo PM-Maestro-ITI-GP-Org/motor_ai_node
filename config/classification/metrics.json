@@ -9,8 +9,8 @@
   "protocol": "leave-one-SESSION-out (5 sessions)",
   "why_this_protocol": "leave-one-recording-out cannot distinguish this model from a session fingerprint: under it a VIBRATION-only control, which cannot see phase-current imbalance by physics, also scores AUC 0.996. Under leave-one-session-out that control collapses to 0.607 while this model stays at 1.000.",
   "auc_recording": 1.0,
-  "auc_ring_verdict": 0.9993395830699688,
-  "accuracy_ring_verdict": 0.9960165030587566,
+  "auc_ring_verdict": 0.9898909916495993,
+  "accuracy_ring_verdict": 0.9584802193497846,
   "false_alarms_recordings": "0/17",
   "detection_recordings": "46/46",
   "negative_control_vibration_auc": {

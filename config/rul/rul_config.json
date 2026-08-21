@@ -26,7 +26,7 @@
     },
     "rationale": "8Rp and 4Rp share a band: on the rig they reach AUC 0.698 pooled over 50 blocks against 0.996 and 0.930 for the other adjacent pairs, because the 0.0125 ohm step is smaller than the contact resistance that varies between setups. Measured on the rig, matching the legacy finding of AUC 0.497."
   },
-  "windows_pooled": 20,
+  "windows_pooled": 10,
   "observed_time_indices": [
     0,
     1,

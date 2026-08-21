@@ -1,27 +1,27 @@
 {
   "primary_model": "mahalanobis",
-  "threshold": 2.787757373916729,
+  "threshold": 4.119600547499681,
   "percentile": 95.0,
   "strategy": "held_out_recording_false_alarm_budget",
   "calibrated_on": "leave-one-of-17-healthy-recordings-out, rig sessions 1-4",
   "direction": "higher_is_anomalous",
-  "pool_windows_assumed": 20,
-  "seconds_per_verdict": 26.0,
+  "pool_windows_assumed": 10,
+  "seconds_per_verdict": 13.0,
   "operating_point": {
-    "false_alarm_rate": 0.050505050505050504,
-    "detection_8Rp": 1.0,
-    "detection_4Rp": 1.0,
+    "false_alarm_rate": 0.050204918032786885,
+    "detection_8Rp": 0.6898928024502297,
+    "detection_4Rp": 0.8365921787709497,
     "detection_2Rp": 1.0,
-    "roc_auc_8Rp": 0.9904894718327554,
-    "recordings_caught_zero_false_alarms": "34/34"
+    "roc_auc_8Rp": 0.9574849998744759,
+    "recordings_caught_zero_false_alarms": "46/46"
   },
-  "threshold_single_capture": 22.815232827462438,
+  "threshold_single_capture": 8.533933493863822,
   "single_capture_operating_point": {
     "applies_to": "motor_infer, and node.conf pool_windows = 1 \u2014 anything scoring ONE unpooled capture",
     "false_alarm_budget": 10.0,
-    "detection_8Rp": 0.07091690544412607,
-    "detection_4Rp": 0.11233766233766233,
-    "detection_2Rp": 0.16970458830923948
+    "detection_8Rp": 0.11819484240687679,
+    "detection_4Rp": 0.1512987012987013,
+    "detection_2Rp": 0.7423004399748586
   },
-  "warning": "`threshold` assumes pool_windows = 20. The ring medians FEATURES, so the score distribution changes shape with ring depth: the ring threshold applied to a single capture flags ~30 % of healthy ones. Use threshold_single_capture for unpooled scoring, and re-run rig_node_refit.py with a matching POOL for any other ring depth."
+  "warning": "`threshold` assumes pool_windows = 10. The ring medians FEATURES, so the score distribution changes shape with ring depth: the ring threshold applied to a single capture flags ~30 % of healthy ones. Use threshold_single_capture for unpooled scoring, and re-run rig_node_refit.py with a matching POOL for any other ring depth."
 }
